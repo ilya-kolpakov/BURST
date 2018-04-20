@@ -53,6 +53,10 @@ This software is released under the GNU Affero General Public License (AGPL) v3.
 		#define _mm_min_epu16(x,y) \
 			_mm_blendv_si128(y, x, _mm_cmple_epu16(x, y))
 		#define _mm_lddqu_si128 _mm_loadu_si128
+		#define _mm_stream_load_si128 _mm_load_si128
+		#include "mm_shuffle_epi8.h"
+		#define _mm_shuffle_epi8(x,y) \
+			ssp_shuffle_epi8_SSE2_new(x,y)
 	#endif
 #endif
 #define PADDING 0
