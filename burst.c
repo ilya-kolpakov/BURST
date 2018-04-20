@@ -823,16 +823,16 @@ size_t parse_tl_faster(char * filename, char ***HeadersP, char ***SeqsP, uint32_
 	_mm_stream_si128((void*)M16->numGapQ,curShfV); \
 }
 
-inline void reScoreM_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, 
+static inline void reScoreM_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, 
  DualCoil *Matrix, DualCoil *Shifts, DualCoil *ShiftR, uint32_t maxED, DualCoil *profile, MetaPack *M16) 
 	RESCOREM_PROTYPE(DIAGSC_MAT16)
 
-inline void reScoreM_xalpha(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, 
+static inline void reScoreM_xalpha(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, 
  DualCoil *Matrix, DualCoil *Shifts, DualCoil *ShiftR, uint32_t maxED, DualCoil *profile, MetaPack *M16) 
 	RESCOREM_PROTYPE(DIAGSC_XALPHA)
 
 // ensure: maxED <= 254
-inline uint32_t prune_ed_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, 
+static inline uint32_t prune_ed_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, 
  uint32_t width, DualCoil *Matrix, DualCoil *profile, uint32_t maxED, uint8_t *MinA) {
 	uint32_t y, x; 
 	__m128i maxEDv = _mm_set1_epi8(maxED+1); /* < 255 ? maxED+1 : 255); /* BAD if score >= maxED+1 */ 
@@ -1022,12 +1022,12 @@ if (startQ > *LoBound) return -1; /* truncation signal */ \
 	*LoBound = -1; \
 	return _mm_extract_epi8(b,0); /* save min of mins as new bound */ \
 }
-inline uint32_t aded_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, DualCoil *Matrix,
+static inline uint32_t aded_mat16(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, DualCoil *Matrix,
  DualCoil *profile, uint32_t maxED, uint32_t startQ, uint32_t *LoBound, uint32_t *HiBound, DualCoil *MinA) ADED_PROTOTYPE(DIAGSC_MAT16)
-inline uint32_t aded_xalpha(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, DualCoil *Matrix,
+static inline uint32_t aded_xalpha(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, DualCoil *Matrix,
  DualCoil *profile, uint32_t maxED, uint32_t startQ, uint32_t *LoBound, uint32_t *HiBound, DualCoil *MinA) 
  ADED_PROTOTYPE(DIAGSC_XALPHA)
-inline uint32_t aded_mat16L(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, uint32_t minlen, 
+static inline uint32_t aded_mat16L(DualCoil *ref, char *query, uint32_t rwidth, uint32_t qlen, uint32_t width, uint32_t minlen, 
  DualCoil *Matrix, DualCoil *profile, uint32_t maxED, uint32_t startQ, uint32_t *LoBound, uint32_t *HiBound, DualCoil *MinA) {
 	if (startQ > *LoBound || minlen > rwidth + maxED) return -1; /* truncation signal */ 
 	uint32_t y, x; 
@@ -1127,7 +1127,7 @@ inline uint32_t aded_mat16L(DualCoil *ref, char *query, uint32_t rwidth, uint32_
 	return _mm_extract_epi8(b,0); /* save min of mins as new bound */ 
 }
 
-inline void translateNV(char* string, size_t len) { // makes string into nums
+static inline void translateNV(char* string, size_t len) { // makes string into nums
 	for (size_t i = 0; i < len; ++i) string[i] = CHAR2NUM[string[i]]; }
 
 //#ifdef __SSSE3__
@@ -1591,7 +1591,7 @@ static inline Split FP_union16x2_AVX(Prince *P1, Prince *P2) {
 #else
 	#define FP_union16x2 FP_union16x2_NV
 #endif
-inline uint64_t QRand64(uint64_t *x) {
+static inline uint64_t QRand64(uint64_t *x) {
 	*x^=*x<<13; *x^=*x>>7; return *x^=*x<<17;}
 	//(*x)^=(*x)>>11; (*x)^=(*x)<<37; (*x)^=(*x)>>4; return *x;}
 			
@@ -1619,7 +1619,7 @@ static inline void create_sse2_profiles(Reference_Data *Rd) {
 }
 
 // New -- Cucasort mk2 inplace
-inline int str_d_gt_0(char *A, char *B, uint32_t maxD) {
+static inline int str_d_gt_0(char *A, char *B, uint32_t maxD) {
 	//for (uint32_t i = 0; i < maxD; ++i)
 	//	if (A[i] != B[i]) return A[i] > B[i];
 	for (uint32_t i = 0; i < maxD; i+=16) {
@@ -1635,7 +1635,7 @@ inline int str_d_gt_0(char *A, char *B, uint32_t maxD) {
 	}
 	return 0;
 }
-inline void iSort(char **s, uint32_t N, uint32_t d, uint32_t maxD) { 
+static inline void iSort(char **s, uint32_t N, uint32_t d, uint32_t maxD) { 
 	for (uint32_t i = 1, j; i < N; ++i) {
 		char *key = s[i];
 		for (j = i; j && str_d_gt_0(s[j-1]+d,key+d,maxD-d); --j) s[j] = s[j-1]; 
@@ -1680,9 +1680,9 @@ void Cucasort(char **S, uint64_t N, uint32_t d, uint32_t maxD) {
 #define CUTOFF 32
 #define MEDCUT 100
 //#define SWAP(s,i,j) { char *t = s[i]; s[i] = s[j]; s[j] = t; }
-inline void swap(char **s, int i, int j) 
+static inline void swap(char **s, int i, int j) 
 	{ char *t = s[i]; s[i] = s[j]; s[j] = t; }
-inline int m3(char **s, int ia, int ib, int ic, int d) {
+static inline int m3(char **s, int ia, int ib, int ic, int d) {
 	int va, vb, vc;
 	if ((va=s[ia][d]) == (vb=s[ib][d])) return ia;
 	if ((vc=s[ic][d]) == va || vc == vb) return ic;
@@ -1724,7 +1724,7 @@ void Qs3w(char **s, unsigned n, int d, int maxD) {
 	Qs3w(s + n-(ge-gt), ge-gt, d, maxD); 
 }
 /////////////////QS3
-inline uint32_t whereDiff(char *A, char *B, uint32_t len) {
+static inline uint32_t whereDiff(char *A, char *B, uint32_t len) {
 	for (uint32_t i = 0; i < len; i+=16) {
 		__m128i x = _mm_lddqu_si128((void*)A + i),
 			y = _mm_lddqu_si128((void*)B + i);
@@ -1737,7 +1737,7 @@ inline uint32_t whereDiff(char *A, char *B, uint32_t len) {
 	}
 	return len;
 }
-inline uint32_t whereDiffMsk(char *A, char *B, uint32_t len) {
+static inline uint32_t whereDiffMsk(char *A, char *B, uint32_t len) {
 	for (uint32_t i = 0; i < len; i+=16) {
 		__m128i x = _mm_lddqu_si128((void*)A + i),
 			y = _mm_lddqu_si128((void*)B + i);
